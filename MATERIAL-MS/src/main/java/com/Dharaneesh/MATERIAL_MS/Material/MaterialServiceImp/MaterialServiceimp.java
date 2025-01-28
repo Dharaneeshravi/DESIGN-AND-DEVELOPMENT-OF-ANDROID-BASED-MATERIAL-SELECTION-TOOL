@@ -1,12 +1,21 @@
 package com.Dharaneesh.MATERIAL_MS.Material.MaterialServiceImp;
 
+import com.Dharaneesh.MATERIAL_MS.Material.DTO.MaterialDTO;
+import com.Dharaneesh.MATERIAL_MS.Material.External.MaterialProperties;
+import com.Dharaneesh.MATERIAL_MS.Material.External.ShapeAvailability;
 import com.Dharaneesh.MATERIAL_MS.Material.Material;
 import com.Dharaneesh.MATERIAL_MS.Material.MaterialRepository;
 import com.Dharaneesh.MATERIAL_MS.Material.MaterialService;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MaterialServiceimp implements MaterialService {
@@ -18,9 +27,25 @@ public class MaterialServiceimp implements MaterialService {
     }
 
     @Override
-    public List<Material> getMaterial() {
+    public List<MaterialDTO> getMaterial() {
 
-        return materialRepository.findAll();
+        List<Material> materialList=materialRepository.findAll();
+        return materialList.stream().map(this::convertToDto).collect(Collectors.toList());
+    }
+
+    private MaterialDTO convertToDto(Material material)
+    {
+        MaterialDTO materialDTO =new MaterialDTO();
+        materialDTO.setMaterial(material);
+        RestTemplate restTemplate=new RestTemplate();
+        ShapeAvailability shapeAvailability=restTemplate.getForObject("http://localhost:8082/shape/"+material.getShapeid(), ShapeAvailability.class);
+        materialDTO.setShapeAvailability(shapeAvailability);
+        ResponseEntity<List<MaterialProperties>> responseEntity=restTemplate.exchange("http://localhost:8083/properties?shapeId=" + material.getShapeid(), HttpMethod.GET, null, new ParameterizedTypeReference<List<MaterialProperties>>() {
+        });
+        List<MaterialProperties> materialProperties=responseEntity.getBody();
+        List<MaterialProperties> materialProperties1=materialProperties;
+        materialDTO.setMaterialProperties(materialProperties);
+        return materialDTO;
     }
 
     @Override

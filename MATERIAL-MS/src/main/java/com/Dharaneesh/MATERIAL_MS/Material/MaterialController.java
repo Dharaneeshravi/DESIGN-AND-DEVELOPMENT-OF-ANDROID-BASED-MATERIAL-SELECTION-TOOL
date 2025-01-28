@@ -1,5 +1,6 @@
 package com.Dharaneesh.MATERIAL_MS.Material;
 
+import com.Dharaneesh.MATERIAL_MS.Material.DTO.MaterialDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class MaterialController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Material>> getMaterial()
+    public ResponseEntity<List<MaterialDTO>> getMaterial()
     {
         return new ResponseEntity<>(materialService.getMaterial(), HttpStatus.OK);
     }

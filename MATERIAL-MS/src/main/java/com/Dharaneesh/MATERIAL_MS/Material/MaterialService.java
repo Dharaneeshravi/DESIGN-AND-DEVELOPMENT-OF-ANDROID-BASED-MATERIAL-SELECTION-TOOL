@@ -1,10 +1,12 @@
 package com.Dharaneesh.MATERIAL_MS.Material;
 
+import com.Dharaneesh.MATERIAL_MS.Material.DTO.MaterialDTO;
+
 import java.util.List;
 
 public interface MaterialService {
 
-    List<Material> getMaterial();
+    List<MaterialDTO> getMaterial();
 
     void createMaterial(Material material);
 
