@@ -6,6 +6,7 @@ import com.Dharaneesh.MATERIAL_MS.Material.External.ShapeAvailability;
 import com.Dharaneesh.MATERIAL_MS.Material.Material;
 import com.Dharaneesh.MATERIAL_MS.Material.MaterialRepository;
 import com.Dharaneesh.MATERIAL_MS.Material.MaterialService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class MaterialServiceimp implements MaterialService {
+
+    @Autowired
+    private  RestTemplate restTemplate;
 
     private final MaterialRepository materialRepository;
 
@@ -37,10 +41,9 @@ public class MaterialServiceimp implements MaterialService {
     {
         MaterialDTO materialDTO =new MaterialDTO();
         materialDTO.setMaterial(material);
-        RestTemplate restTemplate=new RestTemplate();
-        ShapeAvailability shapeAvailability=restTemplate.getForObject("http://localhost:8082/shape/"+material.getShapeid(), ShapeAvailability.class);
+        ShapeAvailability shapeAvailability=restTemplate.getForObject("http://SHAPE-AVAILABILITY-MS:8082/shape/"+material.getShapeid(), ShapeAvailability.class);
         materialDTO.setShapeAvailability(shapeAvailability);
-        ResponseEntity<List<MaterialProperties>> responseEntity=restTemplate.exchange("http://localhost:8083/properties?shapeId=" + material.getShapeid(), HttpMethod.GET, null, new ParameterizedTypeReference<List<MaterialProperties>>() {
+        ResponseEntity<List<MaterialProperties>> responseEntity=restTemplate.exchange("http://MATERIAL-PROPERTIES-MS:8083/properties?shapeId=" + material.getShapeid(), HttpMethod.GET, null, new ParameterizedTypeReference<List<MaterialProperties>>() {
         });
         List<MaterialProperties> materialProperties=responseEntity.getBody();
         List<MaterialProperties> materialProperties1=materialProperties;
