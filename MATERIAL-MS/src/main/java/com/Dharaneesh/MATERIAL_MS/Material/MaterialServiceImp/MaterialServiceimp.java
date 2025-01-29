@@ -3,6 +3,8 @@ package com.Dharaneesh.MATERIAL_MS.Material.MaterialServiceImp;
 import com.Dharaneesh.MATERIAL_MS.Material.DTO.MaterialDTO;
 import com.Dharaneesh.MATERIAL_MS.Material.External.MaterialProperties;
 import com.Dharaneesh.MATERIAL_MS.Material.External.ShapeAvailability;
+import com.Dharaneesh.MATERIAL_MS.Material.FeignClient.MaterialPropertiesClient;
+import com.Dharaneesh.MATERIAL_MS.Material.FeignClient.ShapeAvailabilityClient;
 import com.Dharaneesh.MATERIAL_MS.Material.Material;
 import com.Dharaneesh.MATERIAL_MS.Material.MaterialRepository;
 import com.Dharaneesh.MATERIAL_MS.Material.MaterialService;
@@ -21,13 +23,15 @@ import java.util.stream.Collectors;
 @Service
 public class MaterialServiceimp implements MaterialService {
 
-    @Autowired
-    private  RestTemplate restTemplate;
 
     private final MaterialRepository materialRepository;
+    private final ShapeAvailabilityClient shapeAvailabilityClient;
+    private final MaterialPropertiesClient materialPropertiesClient;
 
-    public MaterialServiceimp(MaterialRepository materialRepository) {
+    public MaterialServiceimp(MaterialRepository materialRepository, ShapeAvailabilityClient shapeAvailabilityClient,MaterialPropertiesClient materialPropertiesClient) {
         this.materialRepository = materialRepository;
+        this.shapeAvailabilityClient=shapeAvailabilityClient;
+        this.materialPropertiesClient=materialPropertiesClient;
     }
 
     @Override
@@ -41,13 +45,10 @@ public class MaterialServiceimp implements MaterialService {
     {
         MaterialDTO materialDTO =new MaterialDTO();
         materialDTO.setMaterial(material);
-        ShapeAvailability shapeAvailability=restTemplate.getForObject("http://SHAPE-AVAILABILITY-MS:8082/shape/"+material.getShapeid(), ShapeAvailability.class);
+        ShapeAvailability shapeAvailability=shapeAvailabilityClient.getShapeAvailability(material.getShapeid());
         materialDTO.setShapeAvailability(shapeAvailability);
-        ResponseEntity<List<MaterialProperties>> responseEntity=restTemplate.exchange("http://MATERIAL-PROPERTIES-MS:8083/properties?shapeId=" + material.getShapeid(), HttpMethod.GET, null, new ParameterizedTypeReference<List<MaterialProperties>>() {
-        });
-        List<MaterialProperties> materialProperties=responseEntity.getBody();
-        List<MaterialProperties> materialProperties1=materialProperties;
-        materialDTO.setMaterialProperties(materialProperties);
+        List<MaterialProperties> materialPropertiesList=materialPropertiesClient.getMaterialProperties(material.getShapeid());
+        materialDTO.setMaterialProperties(materialPropertiesList);
         return materialDTO;
     }
 
